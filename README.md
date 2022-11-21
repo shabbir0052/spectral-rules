@@ -1,5 +1,5 @@
 #### Overview
-Spectral is an Open-Source API Style Guide Enforcer / Linter
+Spectral is an Open-Source API Style Guide Enforcer / Linter to make api consistance and secure
 
 ##### Setting up spectral locally 
 
@@ -83,6 +83,8 @@ You will see the following response. Ensure that warning and errors are resolved
 ```
  
 
+
+Some popular style guide can be found here
 
 
  
