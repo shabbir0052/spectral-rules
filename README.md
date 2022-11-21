@@ -83,8 +83,11 @@ You will see the following response. Ensure that warning and errors are resolved
 ```
  
 
+##### References
 
-Some popular style guide can be found here
-
+ - Some popular style guide can be found here
+    https://github.com/stoplightio/spectral-rulesets
+  - Getting started
+    https://docs.stoplight.io/docs/spectral/674b27b261c3c-overview
 
  
