@@ -1,0 +1,583 @@
+openapi: 3.0.1
+info:
+  title: Claims Adjuster Details
+  version: '1.0'
+  description: >-
+    This API returns claim adjuster details for given claim Id. <br> <br> <u><b>Way to invoke the
+    API</b></u> <br> 1. Invoke security token API with relevant client id and
+    client secret for authorization token. As a best practice, it is suggested
+    to cache the authorization token at the client end till the token expires.
+    Token expiry can be found at "expires_in" attribute of the token API
+    response. "expires_in" is in milliseconds.  <br> 2. Use the authorization
+    token as the bearer token to invoke the Claim Adjuster API with relevant payload.
+    Expired token usage will result in 401.</br> 3. To invoke the API, a minimum
+    of TLSv1.2 protocol has to be used.   
+servers:
+  - url: https://api-dev.n01.csaa-insurance.aaa.com/{basePath}
+    description: DEV
+    variables:
+      basePath:
+        default: v1-claims
+  - url: https://api-qa.n01.csaa-insurance.aaa.com/{basePath}
+    description: QA
+    variables:
+      basePath:
+        default: v1-claims
+  - url: https://api-e2e.n01.csaa-insurance.aaa.com/{basePath}
+    description: E2E
+    variables:
+      basePath:
+        default: v1-claims
+  - url: https://api-perf.n01.csaa-insurance.aaa.com/{basePath}
+    description: PERF
+    variables:
+      basePath:
+        default: v1-claims
+  - url: https://api-stage.p01.csaa-insurance.aaa.com/{basePath}
+    description: STAGE
+    variables:
+      basePath:
+        default: v1-claims
+  - url: https://api.p01.csaa-insurance.aaa.com/{basePath}
+    description: PROD
+    variables:
+      basePath:
+        default: v1-claims
+paths:
+  /adjusterDetails/health:
+    get:
+      tags: 
+        - Health Check
+      operationId: getHealthStatus
+      responses:
+        '200':
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'        
+          content:
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+               Health Response:
+                value: 
+                       status: OK
+                       components:
+                         secretManager:
+                           status: OK
+                           details:
+                             - 'csaa-apihub-nonprod-claims-adjusterDetails-cred': OK'
+                         casAdjusterAPI:
+                           status: OK
+                           details:
+                             - 'https://v10-casqa.tent.trt.csaa.pri:8443/cc/ws/aaa/webservices/claims/ClaimAdjusterDetailsAPI_AAA/soap11': OK'
+                       
+          description: |
+            API Healthy
+        '401':
+          description: 401 response
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'                  
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+              example:
+                message: Unauthorized
+        '500':
+          description: 500 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: fail
+                components:
+                  secretManager:
+                    status: OK
+                    details:
+                      - csaa-apihub-nonprod-claims-adjusterDetails-creds: OK
+                  casAdjusterAPI:
+                    status: failure
+                    details:
+                      - https://v10-casperf.tent.trt.csaa.pri/cc/ws/aaa/webservices/claims/ClaimAdjusterDetailsAPI_AAA/soap11: 'Error while consuming CAS Adjuster API '
+  /adjusterDetails:
+    get:
+      tags: 
+        - Claim Adjuster
+      operationId: getClaimAdjusterDetails
+      parameters:
+        - name: x-api-key
+          in: header
+          description: Unique api key for each consumer
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: 4xyz78b9-0cdc
+        - name: X-ApplicationContext
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApplicationContext'
+        - name: claimNumber
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 20
+            pattern: ^[-0-9]*$
+            example: 1000-00-0930
+        - name: include-supervisor-info
+          in: query
+          required: false
+          schema:
+            type: boolean
+            description: include supervisor info. Default value is false
+            example: 1000-00-0930            
+      responses:
+        '200':
+          description: 200 response
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'                  
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                adjusterResponse:
+                  value:
+                    claimAssignedGroup: OKRC CSA Glass - Sup C Davis
+                    claimAssignedUser: Cara Scott
+                    claimLossDate: '2012-10-26T13:00:00.000Z'
+                    claimNumber: 1000-00-0930
+                    claimStatus: closed
+                    insured: THOMAS LE
+                    LOB: AUTO
+                    policyNumber: CAAS200070652
+                    adjusterDetails:
+                      availability: atwork
+                      emailID: Azny.Habbt@tqeo.yjs
+                      employeeStatus: Active
+                      primaryPhoneType: work
+                      userID: g4vdavi
+                      workPhone: '3013634873'
+                adjuster-with-supervisor:
+                  value:
+                    claimAssignedGroup: OKRC CSA Glass - Sup C Davis
+                    claimAssignedUser: Cara Scott
+                    claimLossDate: '2012-10-26T13:00:00.000Z'
+                    claimNumber: 1000-00-0930
+                    claimStatus: closed
+                    insured: THOMAS LE
+                    LOB: AUTO
+                    policyNumber: CAAS200070652
+                    adjusterDetails:
+                      availability: atwork
+                      emailID: Azny.Habbt@tqeo.yjs
+                      employeeStatus: Active
+                      primaryPhoneType: work
+                      userID: g4vdavi
+                      workPhone: '3013634873' 
+                      supervisors:
+                       -  level: '01'
+                          emailID: smith.john.imidiate@contoso.com
+                       -  level: '02'
+                          emailID: smith.senior@contoso.com
+                       -  level: '03'
+                          emailID: smith.supersenior@contoso.com                      
+                       
+                      
+                      
+        '400':
+          description: 400 response
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'                  
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+              example:
+                message: Invalid request body
+                errors:
+                  - messageCode: '400'
+                    messageDescription: '[ missing required query params (["claimNumber"])]'
+                    relatedAttribute: ''
+        '401':
+          description: 401 response
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'                  
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+              example:
+                message: Unauthorized
+        '404':
+          description: 404 response
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'                  
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+              example:
+                message: Not Found
+        '500':
+          description: 500 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+              example:
+                message: Internal Server Error
+  /api/v2/claims/adjuster/supervisors:
+        get:
+            tags:
+                - Claim Adjuster
+            parameters:
+                - name: x-api-key
+                  description: Unique api key for each consumer
+                  schema:
+                      type: string
+                      example: 4xyz78b9-0cdc
+                  in: header
+                  required: true
+                - name: backEnd_env
+                  description: Back end envinment
+                  schema:
+                      type: string
+                      example: qa1
+                  in: query
+                  required: false
+                - name: X-ApplicationContext
+                  description: Application context
+                  schema:
+                      $ref: "#/components/schemas/ApplicationContext"
+                  in: header
+                  required: true
+                - name: email_id
+                  description: Unique identifier for a billing resource
+                  schema:
+                      type: string
+                      example: 'john.doe@@contoso.com'
+                  in: query
+                  required: true
+            responses:
+                "200":
+                    headers:
+                        X-ApplicationContext:
+                            schema:
+                                $ref: "#/components/schemas/ApplicationContext"
+                        X-RateLimit-Limit:
+                           $ref: '#/components/headers/X-RateLimit-Limit'
+                        X-RateLimit-Remaining:
+                          $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AdjusterSurpervisors"
+                            examples:
+                                sample-response-1:                                
+                                  value:
+                                   -  level: '01'
+                                      emailID: smith.john.imidiate@contoso.com
+                                   -  level: '02'
+                                      emailID: smith.senior@contoso.com
+                                   -  level: '03'
+                                      emailID: smith.supersenior@contoso.com
+                                      
+                                    
+                                
+                    description: 200 response
+                "400":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 400 response
+                "401":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 401 response
+                "403":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 403 response
+                "409":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 409 response
+                "422":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 422 response
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 500 response
+
+            operationId: getBillingSummary
+            summary: Supervisor details
+            description: >-
+                This method will provide the supervisor details , with current version on supervisor email
+
+  /api/v2/claims/adjuster/supervisor/health:
+        get:
+            tags:
+                - Claim Adjuster
+            parameters:
+                - name: x-api-key
+                  description: Unique api key for each consumer
+                  schema:
+                      type: string
+                      example: 4xyz78b9-0cdc
+                  in: header
+                  required: true
+                - name: X-ApplicationContext
+                  description: Application context
+                  schema:
+                      $ref: "#/components/schemas/ApplicationContext"
+                  in: header
+                  required: true
+            responses:
+                "200":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json: {}
+                    description: 200 response
+                "400":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                        
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 400 response
+                "401":
+                    headers:
+                      X-RateLimit-Limit:
+                        $ref: '#/components/headers/X-RateLimit-Limit'
+                      X-RateLimit-Remaining:
+                        $ref: '#/components/headers/X-RateLimit-Remaining'                                      
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 401 response
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Fault"
+                    description: 500 response
+            summary: Health check endpoint
+            description: Health check endpoint                
+components:
+
+  headers:
+    X-RateLimit-Limit:
+      description: Request limit per hour
+      schema:
+        type: integer
+      example: 100
+    X-RateLimit-Remaining:
+        schema:
+          type: integer
+        example: 94
+  schemas:
+  
+      
+    Response:
+      title: API Response
+      type: object
+      properties:
+        claimAssignedGroup:
+          type: string
+        claimAssignedUser:
+          type: string
+        claimLossDate:
+          type: string
+        claimNumber:
+          type: string
+        claimStatus:
+          type: string
+        insured:
+          type: string
+        LOB:
+          type: string
+        policyNumber:
+          type: string
+        adjusterDetails:
+          $ref: '#/components/schemas/AdjusterDetails'
+      description: Provides Claim Adjuster information
+    AdjusterDetails:
+      title: Adjuster details 
+      type: object
+      properties:
+        availability:
+          type: string
+        emailID:
+          type: string
+        employeeStatus:
+          type: string
+        primaryPhoneType:
+          type: string
+        userID:
+          type: string
+        workPhone:
+          type: string
+        supervisors:
+          type: array
+          items:
+             $ref: '#/components/schemas/AdjusterSurpervisorInfo'
+          
+    Fault:
+      type: object
+      properties:
+        message:
+          type: string
+          description: generic error message description.
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              messageCode:
+                type: string
+                description: error code
+              messageDescription:
+                type: string
+                description: Error message in detail.
+              relatedAttribute:
+                type: string
+                description: attribute name that needs to be corrected in order to avoid the validation error
+      description: Error Response from API
+    HealthResponse:
+      title: Health Response
+      description: API Response
+      type: object
+      properties:
+        status:
+          type: string
+        components:
+          type: object
+    ApplicationContext:
+      description: Application context
+      required:
+        - application
+        - correlationId
+      type: object
+      properties:
+        userId:
+          description: Requester Userid
+          pattern: '^[a-zA-Z0-9.-_'']{0,20}$'
+          type: string
+          example: es0t
+        application:
+          description: Consumer application.
+          pattern: '^[a-zA-Z0-9.-_'']{2,30}$'
+          type: string
+          example: IEWMS
+        correlationId:
+          format: uuid
+          description: Unique Id for the transaction UUID
+          type: string
+          example: f94e54f8-50a6-43e3-9c2a-c2c60b13b14d
+        subSystem:
+          description: Indicates the consumer subsystem
+          pattern: '^[a-zA-Z0-9.-_'']{0,40}$'
+          type: string
+          example: INSPRL
+        address:
+          description: IP address of the caller
+          pattern: '^[0-9.]{0,40}$'
+          type: string
+          example: 172.29.143.200 
+
+
+    AdjusterSurpervisors:
+        description: Supervisor info Response
+        type: array
+        items:
+           $ref: '#/components/schemas/AdjusterSurpervisorInfo'
+         
+          
+    AdjusterSurpervisorInfo:
+        description: Supervisor info
+        type: object
+        properties:
+            level: 
+              description: "01 - immediate, 02 one level up etc"
+              type: string
+              enum:
+                - "01"
+                - "02"
+                - "03"
+                
+            emailID:
+              maxLength: 100
+              pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+              type: string
+              example: 'smith.clark@contoso.com'
+          

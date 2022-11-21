@@ -1,0 +1,5 @@
+extends: 
+  - "spectral:oas"
+  - "spectral-aws-apigateway-ruleset"
+  - "@stoplight/spectral-owasp-ruleset"
+  - "@apisyouwonthate/style-guide"
