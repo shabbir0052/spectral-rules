@@ -20,7 +20,7 @@ Install the style guide
 Copy .spectral.yaml, from this repository  to the local folder
 
 Run the rules  
-   `spectral lint api/openapi.yaml`
+   `spectral lint openapi_spec.yaml`
 
 
 You will see the following response. Ensure that warning and errors are resolved as much as possible before checking in the API spec to git hub/API portal
