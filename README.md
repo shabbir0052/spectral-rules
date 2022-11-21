@@ -1,3 +1,6 @@
+#### Overview
+Spectral is an Open-Source API Style Guide Enforcer / Linter
+
 ##### Setting up spectral locally 
 
 Change to the directory where open API spec resides
